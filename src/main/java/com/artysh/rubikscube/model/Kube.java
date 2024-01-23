@@ -1,7 +1,7 @@
-package com.artysh.ribikscube.model;
+package com.artysh.rubikscube.model;
 
-import com.artysh.ribikscube.enums.Color;
-import com.artysh.ribikscube.enums.RotateDirection;
+import com.artysh.rubikscube.enums.Color;
+import com.artysh.rubikscube.enums.RotateDirection;
 import lombok.Data;
 
 import java.util.ArrayList;

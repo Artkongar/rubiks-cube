@@ -1,7 +1,7 @@
-package com.artysh.ribikscube;
+package com.artysh.rubikscube;
 
-import com.artysh.ribikscube.enums.RotateDirection;
-import com.artysh.ribikscube.model.MainKube;
+import com.artysh.rubikscube.enums.RotateDirection;
+import com.artysh.rubikscube.model.MainKube;
 
 public class Main {
 
