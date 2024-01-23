@@ -1,17 +1,16 @@
-package com.artysh.rubikscube.model;
+package com.artysh.rubikscube.engine;
 
 import com.artysh.rubikscube.enums.Color;
 import com.artysh.rubikscube.enums.RotateDirection;
-import lombok.Data;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
 public class Kube {
 
     private Integer mainKubeSize;
-
     private Integer x;
     private Integer y;
     private Integer z;

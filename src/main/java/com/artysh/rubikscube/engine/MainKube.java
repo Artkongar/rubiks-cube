@@ -1,12 +1,10 @@
-package com.artysh.rubikscube.model;
+package com.artysh.rubikscube.engine;
 
 import com.artysh.rubikscube.enums.RotateDirection;
-import lombok.Data;
 
 import java.util.LinkedList;
 import java.util.List;
 
-@Data
 public class MainKube {
 
     private int size;
