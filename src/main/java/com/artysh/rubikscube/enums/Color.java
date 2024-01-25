@@ -1,6 +1,7 @@
 package com.artysh.rubikscube.enums;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
 public enum Color {
@@ -12,5 +13,6 @@ public enum Color {
     BLUE(5),
     GREEN(6);
 
+    @Getter
     private int sideNumber;
 }
