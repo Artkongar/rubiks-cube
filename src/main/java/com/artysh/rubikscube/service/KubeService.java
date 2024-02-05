@@ -16,15 +16,11 @@ public class KubeService {
 
     private final Map<UUID, MainKube> games = new HashMap<>();
 
-    public CubeSidesDto createGame(int cubeSize) {
+    public UUID createGame(int cubeSize) {
         MainKube mainKube = new MainKube(cubeSize);
         UUID gameId = UUID.randomUUID();
         games.put(gameId, mainKube);
-        Map<Integer, List<Color>> sides = mainKube.getAllColoredSide();
-        return CubeSidesDto.builder()
-                .gameId(gameId)
-                .sides(sides)
-                .build();
+        return gameId;
     }
 
     public CubeSidesDto rotateKube(UUID gameId, KubeRotateDto dto) {
@@ -39,6 +35,14 @@ public class KubeService {
 
     public boolean isCorrect(UUID gameId) {
         return games.get(gameId).isCorrect();
+    }
+
+    public CubeSidesDto getKubeSides(UUID gameId) {
+        MainKube mainKube = games.get(gameId);
+        return CubeSidesDto.builder()
+                .gameId(gameId)
+                .sides(mainKube.getAllColoredSide())
+                .build();
     }
 
 }

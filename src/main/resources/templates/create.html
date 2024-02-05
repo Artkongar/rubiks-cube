@@ -1,0 +1,52 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        div.container4 {
+            height: 10em;
+            position: relative
+        }
+
+        div.container4 input {
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-right: -50%;
+            transform: translate(-50%, -50%)
+        }
+
+        div.container4 p {
+            margin: 0;
+            position: absolute;
+            top: 35%;
+            left: 50%;
+            margin-right: -50%;
+            transform: translate(-50%, -50%)
+        }
+
+        div.container4 .b {
+            margin: 0;
+            position: absolute;
+            top: 65%;
+            left: 50%;
+            margin-right: -50%;
+            transform: translate(-50%, -50%)
+        }
+    </style>
+</head>
+<body>
+
+<div class=container4>
+    <form action = "/startGame" method="POST">
+        <p>Enter cube size</p>
+        <input value="3" th:name="cube-size"/>
+        <input class="b" value="Start" type="submit"/>
+    </form>
+</div>
+
+</body>
+</html>
