@@ -1,5 +1,6 @@
 package com.artysh.rubikscube.core;
 
+import com.artysh.rubikscube.dto.Coordinates;
 import com.artysh.rubikscube.enums.Color;
 import com.artysh.rubikscube.enums.RotateDirection;
 
@@ -68,9 +69,9 @@ public class MainKube {
         }
     }
 
-    public List<Color> getColoredSide(Color side) {
+    public List<Map.Entry<Color, Coordinates>> getColoredSide(Color side) {
         List<Kube> cubes = sides.get(side);
-        List<Color> sideCubesColors = cubes.stream().sorted((cube1, cube2) -> {
+        List<Map.Entry<Color, Coordinates>> sideCubesColors = cubes.stream().sorted((cube1, cube2) -> {
             Function<Integer, Integer> calculateRevertedValue = (coordinate) -> (size - 1) - coordinate;
 
             int revertedX1 = calculateRevertedValue.apply(cube1.getX());
@@ -92,12 +93,18 @@ public class MainKube {
             } else {
                 return (cube1.getZ() * 10 + cube1.getX()) - (cube2.getZ() * 10 + cube2.getX());
             }
-        }).map(kube -> kube.getSides().get(side)).collect(Collectors.toList());
+        }).map(kube -> {
+            Coordinates coordinates = new Coordinates();
+            coordinates.setX(kube.getX());
+            coordinates.setY(kube.getY());
+            coordinates.setZ(kube.getZ());
+            return Map.entry(kube.getSides().get(side), coordinates);
+        }).collect(Collectors.toList());
 
         return sideCubesColors;
     }
 
-    public Map<Color, List<Color>> getAllColoredSide() {
+    public Map<Color, List<Map.Entry<Color, Coordinates>>> getAllColoredSide() {
         return Arrays.stream(Color.values())
                 .collect(
                         Collectors.toMap(color -> color, this::getColoredSide)

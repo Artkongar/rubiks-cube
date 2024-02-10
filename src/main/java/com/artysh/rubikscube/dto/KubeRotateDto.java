@@ -4,11 +4,8 @@ import com.artysh.rubikscube.enums.RotateDirection;
 import lombok.Data;
 
 @Data
-public class KubeRotateDto {
+public class KubeRotateDto extends Coordinates{
 
-    private int x;
-    private int y;
-    private int z;
     private RotateDirection direction;
 
 }

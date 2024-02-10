@@ -28,7 +28,8 @@ public class KubeController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public CubeSidesDto rotateKube(@PathVariable UUID gameId, @RequestBody KubeRotateDto dto) {
-        return kubeService.rotateKube(gameId, dto);
+        CubeSidesDto result = kubeService.rotateKube(gameId, dto);
+        return result;
     }
 
     @PostMapping(

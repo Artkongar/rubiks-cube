@@ -100,8 +100,46 @@
             document.querySelector('.cube').style.transform = 'rotateY(' + y + 'deg) rotateX(' + x + 'deg)';
         });
 
-        function rotateCube() {
-            alert("Rotate");
+        function getParentNode(element, level = 1) {
+            while (level-- > 0) {
+                element = element.parentElement;
+                if (!element) return null;
+            }
+            return element;
+        }
+
+        function rotateCube(element) {
+            let parentCell = getParentNode(element, 4);
+            let x = parseInt(parentCell.getAttribute('x_coord'));
+            let y = parseInt(parentCell.getAttribute('y_coord'));
+            let z = parseInt(parentCell.getAttribute('z_coord'));
+            let direction = element.getAttribute("direction");
+            let body = "{" +
+                " \"direction\" : \"" + direction + "\"," +
+                " \"x\" : " + x + "," +
+                " \"y\" : " + y + "," +
+                " \"z\" : " + z +
+                "}";
+
+            let gameId = location.pathname.split('/')[2];
+            let xhr = new XMLHttpRequest();
+            let hostname = location.hostname;
+            xhr.open('POST', window.location.protocol + '//' + hostname + ':' + window.location.port + '/kube/' + gameId + "/rotate", true);
+            xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+            xhr.setRequestHeader('Access-Control-Allow-Methods', 'POST');
+            xhr.setRequestHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    let mainKube = document.getElementById("mainKube");
+                    mainKube.innerHTML = '';
+                    printCube();
+                }
+            }
+
+            xhr.send(body);
+
+
         }
 
         function printCube() {
@@ -145,17 +183,29 @@
                             mainKubeData += '<tr>';
                             for (let j = 0; j < cubeSize; j++) {
                                 let cellColorIndex = i * cubeSize + j;
-                                let cellColor = cellsColor[cellColorIndex];
-                                mainKubeData += `<td bgcolor="` + cellColor + `" class="border-td">`;
+                                let colorAndCoords = Object.entries(cellsColor[cellColorIndex])[0];
+                                let cellColor = colorAndCoords[0];
+                                let coordinates = colorAndCoords[1];
 
+                                mainKubeData += `<td bgcolor="` + cellColor + `" class="border-td" x_coord="` + coordinates["x"] + `" y_coord="` + coordinates["y"] + `" z_coord="` + coordinates["z"] + `">`;
                                 mainKubeData += `
                                     <table class="td-size">
                                         <tr>`;
                                 mainKubeData += `
                                             <td class="arrow-size"></td>`;
                                 if (i === 0) {
+                                    let direction = ''
+                                    if (color === 'RED' || color === 'YELLOW' || color === 'WHITE') {
+                                        direction = 'Z_UP';
+                                    } else if (color === 'ORANGE') {
+                                        direction = 'Z_DOWN';
+                                    } else if (color === 'BLUE') {
+                                        direction = 'Y_UP';
+                                    } else if (color === 'GREEN') {
+                                        direction = 'Y_DOWN';
+                                    }
                                     mainKubeData += `
-                                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="rotateCube()">&uarr;</td>`;
+                                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="rotateCube(this)" direction="` + direction + `">&uarr;</td>`;
                                 } else {
                                     mainKubeData += `
                                             <td class="arrow-size"></td>`;
@@ -166,8 +216,17 @@
                                         </tr>
                                         <tr>`;
                                 if (j === 0) {
+                                    let direction = ''
+                                    if (color === 'RED' || color === 'BLUE' || color === 'ORANGE' || color === 'GREEN') {
+                                        direction = 'X_DOWN';
+                                    } else if (color === 'WHITE') {
+                                        direction = 'Y_UP';
+                                    } else if (color === 'YELLOW') {
+                                        direction = 'Y_DOWN';
+                                    }
+
                                     mainKubeData += `
-                                            <td class="arrow-size" style="font-size: 3em" onclick="rotateCube()">&larr;</td>`;
+                                            <td class="arrow-size" style="font-size: 3em" onclick="rotateCube(this)" direction="` + direction + `">&larr;</td>`;
                                 } else {
                                     mainKubeData += `
                                             <td class="arrow-size"></td>`;
@@ -175,8 +234,17 @@
                                 mainKubeData += `
                                             <td class="arrow-size"></td>`;
                                 if (j === cubeSize - 1) {
+                                    let direction = ''
+                                    if (color === 'RED' || color === 'BLUE' || color === 'ORANGE' || color === 'GREEN') {
+                                        direction = 'X_UP';
+                                    } else if (color === 'WHITE') {
+                                        direction = 'Y_DOWN';
+                                    } else if (color === 'YELLOW') {
+                                        direction = 'Y_UP';
+                                    }
+
                                     mainKubeData += `
-                                            <td class="arrow-size" style="font-size: 3em" onclick="rotateCube()">&rarr;</td>`;
+                                            <td class="arrow-size" style="font-size: 3em" onclick="rotateCube(this)" direction="` + direction + `">&rarr;</td>`;
                                 } else {
                                     mainKubeData += `
                                         <td class="arrow-size"></td>`;
@@ -187,8 +255,19 @@
                                 mainKubeData += `
                                         <td class="arrow-size"></td>`;
                                 if (i === cubeSize - 1) {
+                                    let direction = ''
+                                    if (color === 'RED' || color === 'YELLOW' || color === 'WHITE') {
+                                        direction = 'Z_DOWN';
+                                    } else if (color === 'ORANGE') {
+                                        direction = 'Z_UP';
+                                    } else if (color === 'BLUE') {
+                                        direction = 'Y_DOWN';
+                                    } else if (color === 'GREEN') {
+                                        direction = 'Y_UP';
+                                    }
+
                                     mainKubeData += `
-                                        <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="rotateCube()" rotate="down">&darr;</td>`;
+                                        <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="rotateCube(this)" rotate="down" direction="` + direction + `">&darr;</td>`;
                                 } else {
                                     mainKubeData += `
                                         <td class="arrow-size"></td>`;

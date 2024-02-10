@@ -1,6 +1,7 @@
 package com.artysh.rubikscube.service;
 
 import com.artysh.rubikscube.core.MainKube;
+import com.artysh.rubikscube.dto.Coordinates;
 import com.artysh.rubikscube.dto.CubeSidesDto;
 import com.artysh.rubikscube.dto.KubeRotateDto;
 import com.artysh.rubikscube.enums.Color;
@@ -26,7 +27,7 @@ public class KubeService {
     public CubeSidesDto rotateKube(UUID gameId, KubeRotateDto dto) {
         MainKube kube = games.get(gameId);
         kube.rotateKube(dto.getX(), dto.getY(), dto.getZ(), dto.getDirection());
-        Map<Color, List<Color>> sides = kube.getAllColoredSide();
+        Map<Color, List<Map.Entry<Color, Coordinates>>> sides = kube.getAllColoredSide();
         return CubeSidesDto.builder()
                 .gameId(gameId)
                 .size(kube.getSize())

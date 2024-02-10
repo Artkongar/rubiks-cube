@@ -14,6 +14,6 @@ public class CubeSidesDto {
 
     private UUID gameId;
     private Integer size;
-    private Map<Color, List<Color>> sides;
+    private Map<Color, List<Map.Entry<Color, Coordinates>>> sides;
 
 }
