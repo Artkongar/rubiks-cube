@@ -1,5 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
@@ -16,6 +17,7 @@
             justify-content: center;
             align-items: center;
             perspective: 700px;
+            background-color: #c49e9e;
         }
 
         .cube {
@@ -86,7 +88,7 @@
         }
 
     </style>
-    <script>
+    <script th:inline="javascript">
         let x = 0;
         let y = 0;
         document.addEventListener('keydown', function (e) {
@@ -98,1039 +100,126 @@
             document.querySelector('.cube').style.transform = 'rotateY(' + y + 'deg) rotateX(' + x + 'deg)';
         });
 
-        function call(v) {
-            console.log(v);
+        function rotateCube() {
+            alert("Rotate");
+        }
+
+        function printCube() {
+            let gameId = location.pathname.split('/')[2];
+
+            const sidesClasses = new Map();
+            sidesClasses.set("RED", "side front");
+            sidesClasses.set("ORANGE", "side back");
+            sidesClasses.set("GREEN", "side left");
+            sidesClasses.set("BLUE", "side right");
+            sidesClasses.set("WHITE", "side top");
+            sidesClasses.set("YELLOW", "side bottom");
 
             let xhr = new XMLHttpRequest();
-            xhr.open('GET', 'http://localhost:8083/kube/3', true);
+            let hostname = location.hostname;
+            xhr.open('POST', window.location.protocol + '//' + hostname + ':' + window.location.port + '/kube/' + gameId, true);
             xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
-            xhr.setRequestHeader('Access-Control-Allow-Methods', 'GET');
+            xhr.setRequestHeader('Access-Control-Allow-Methods', 'POST');
             xhr.setRequestHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.onload = function () {
-                let data = JSON.parse(xhr.responseText);
-                console.log(data);
+                if (xhr.status === 200) {
+                    let mainKube = document.getElementById("mainKube");
+                    let data = JSON.parse(xhr.responseText);
+
+                    let cubeSize = data.size;
+                    let iter = sidesClasses.keys();
+                    let colorElement = iter.next();
+                    let mainKubeData = '';
+                    while (colorElement.value !== undefined) {
+                        let color = colorElement.value;
+                        let className = sidesClasses.get(color);
+                        let cellsColor = data.sides[color];
+
+                        mainKubeData += `
+                        <div class="` + className + `">
+                            <table class="table">`;
+
+                        for (let i = 0; i < cubeSize; i++) {
+                            console.log('i' + i);
+                            mainKubeData += '<tr>';
+                            for (let j = 0; j < cubeSize; j++) {
+                                let cellColorIndex = i * cubeSize + j;
+                                let cellColor = cellsColor[cellColorIndex];
+                                mainKubeData += `<td bgcolor="` + cellColor + `" class="border-td">`;
+
+                                mainKubeData += `
+                                    <table class="td-size">
+                                        <tr>`;
+                                mainKubeData += `
+                                            <td class="arrow-size"></td>`;
+                                if (i === 0) {
+                                    mainKubeData += `
+                                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="rotateCube()">&uarr;</td>`;
+                                } else {
+                                    mainKubeData += `
+                                            <td class="arrow-size"></td>`;
+                                }
+                                mainKubeData += `
+                                            <td class="arrow-size"></td>`;
+                                mainKubeData += `
+                                        </tr>
+                                        <tr>`;
+                                if (j === 0) {
+                                    mainKubeData += `
+                                            <td class="arrow-size" style="font-size: 3em" onclick="rotateCube()">&larr;</td>`;
+                                } else {
+                                    mainKubeData += `
+                                            <td class="arrow-size"></td>`;
+                                }
+                                mainKubeData += `
+                                            <td class="arrow-size"></td>`;
+                                if (j === cubeSize - 1) {
+                                    mainKubeData += `
+                                            <td class="arrow-size" style="font-size: 3em" onclick="rotateCube()">&rarr;</td>`;
+                                } else {
+                                    mainKubeData += `
+                                        <td class="arrow-size"></td>`;
+                                }
+                                mainKubeData += `
+                                        </tr>
+                                        <tr>`;
+                                mainKubeData += `
+                                        <td class="arrow-size"></td>`;
+                                if (i === cubeSize - 1) {
+                                    mainKubeData += `
+                                        <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="rotateCube()" rotate="down">&darr;</td>`;
+                                } else {
+                                    mainKubeData += `
+                                        <td class="arrow-size"></td>`;
+                                }
+                                mainKubeData += `
+                                        <td class="arrow-size"></td>
+                                    </tr>
+                                </table>`;
+                                mainKubeData += `</td>`;
+                            }
+                            mainKubeData += '</tr>';
+                        }
+
+                        mainKubeData += `
+                            </table>
+                        </div>`;
+
+                        colorElement = iter.next();
+                    }
+                    mainKube.innerHTML += mainKubeData;
+                }
             }
             xhr.send();
         }
+
+        window.onload = printCube;
     </script>
 </head>
 <body>
-<div class="cube">
-    <div class="side front">
-        <table class="table">
-            <tr>
-                <td bgcolor="red" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call('123')">&uarr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&larr;</td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="red" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&uarr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="red" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&uarr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&rarr;</td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr>
-                <td bgcolor="red" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&larr;</td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="red" class="border-td"></td>
-                <td bgcolor="red" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&rarr;</td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr>
-                <td bgcolor="red" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&larr;</td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&darr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="red" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&darr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="red" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&rarr;</td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&darr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
-    </div>
-    <div class="side back">
-        <table class="table">
-            <tr>
-                <td bgcolor="orange" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&uarr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&larr;</td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="orange" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&uarr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="orange" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&uarr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&rarr;</td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr>
-                <td bgcolor="orange" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&larr;</td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="orange" class="border-td"></td>
-                <td bgcolor="orange" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&rarr;</td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr>
-                <td bgcolor="orange" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&larr;</td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&darr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="orange" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&darr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="orange" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&rarr;</td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&darr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
-    </div>
-    <div class="side left" style="background: #9a6dea">
-        <table class="table">
-            <tr>
-                <td bgcolor="green" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&uarr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&larr;</td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="green" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&uarr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="green" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&uarr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&rarr;</td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr>
-                <td bgcolor="green" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&larr;</td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="green" class="border-td"></td>
-                <td bgcolor="green" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&rarr;</td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr>
-                <td bgcolor="green" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&larr;</td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&darr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="green" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&darr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="green" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&rarr;</td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&darr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
-    </div>
-    <div class="side right">
-        <table class="table">
-            <tr>
-                <td bgcolor="blue" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&uarr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&larr;</td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="blue" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&uarr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="blue" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&uarr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&rarr;</td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr>
-                <td bgcolor="blue" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&larr;</td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="blue" class="border-td"></td>
-                <td bgcolor="blue" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&rarr;</td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr>
-                <td bgcolor="blue" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&larr;</td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&darr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="blue" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&darr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="blue" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&rarr;</td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&darr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
-    </div>
-    <div class="side top">
-        <table class="table">
-            <tr>
-                <td bgcolor="white" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&uarr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&larr;</td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="white" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&uarr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="white" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&uarr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&rarr;</td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr>
-                <td bgcolor="white" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&larr;</td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="white" class="border-td"></td>
-                <td bgcolor="white" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&rarr;</td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr>
-                <td bgcolor="white" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&larr;</td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&darr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="white" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&darr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="white" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&rarr;</td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&darr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
-    </div>
-    <div class="side bottom">
-        <table class="table">
-            <tr>
-                <td bgcolor="yellow" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&uarr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&larr;</td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="yellow" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&uarr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="yellow" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&uarr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&rarr;</td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr>
-                <td bgcolor="yellow" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&larr;</td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="yellow" class="border-td"></td>
-                <td bgcolor="yellow" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&rarr;</td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr>
-                <td bgcolor="yellow" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&larr;</td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&darr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="yellow" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&darr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td bgcolor="yellow" class="border-td">
-                    <table class="td-size">
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em" onclick="call()">&rarr;</td>
-                        </tr>
-                        <tr>
-                            <td class="arrow-size"></td>
-                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="call()">&darr;
-                            </td>
-                            <td class="arrow-size"></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
-    </div>
+<div class="cube" id="mainKube">
+
 </div>
 </body>
 </html>

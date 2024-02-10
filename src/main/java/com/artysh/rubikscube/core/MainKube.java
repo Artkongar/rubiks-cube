@@ -97,15 +97,14 @@ public class MainKube {
         return sideCubesColors;
     }
 
-    public Map<Integer, List<Color>> getAllColoredSide() {
+    public Map<Color, List<Color>> getAllColoredSide() {
         return Arrays.stream(Color.values())
                 .collect(
-                        Collectors.toMap(Color::getSideNumber, this::getColoredSide)
+                        Collectors.toMap(color -> color, this::getColoredSide)
                 );
     }
 
-
-    protected int getSize() {
+    public int getSize() {
         return this.size;
     }
 

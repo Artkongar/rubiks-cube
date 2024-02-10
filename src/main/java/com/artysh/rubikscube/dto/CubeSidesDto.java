@@ -13,6 +13,7 @@ import java.util.UUID;
 public class CubeSidesDto {
 
     private UUID gameId;
-    private Map<Integer, List<Color>> sides;
+    private Integer size;
+    private Map<Color, List<Color>> sides;
 
 }

@@ -1,8 +1,9 @@
-package com.artysh.rubikscube.controller;
+package com.artysh.rubikscube.view;
 
-import com.artysh.rubikscube.dto.CubeSidesDto;
+import com.artysh.rubikscube.controller.KubeController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,17 +24,15 @@ public class MainController {
 
     @RequestMapping(value = "/startGame", method = RequestMethod.POST)
     public ModelAndView initGame(@RequestParam(value = "cube-size") Integer cubeSize) {
-        ModelAndView model = new ModelAndView("redirect:/game");
+        ModelAndView model = new ModelAndView("redirect:/game/{id}");
         UUID gameId = controller.initKube(cubeSize.longValue());
         model.addObject("id", gameId.toString());
         return model;
     }
 
-    @RequestMapping(value = "/game", method = RequestMethod.GET)
-    public ModelAndView startGame(@RequestParam(value = "id") String gameId) {
+    @RequestMapping(value = "/game/{id}", method = RequestMethod.GET)
+    public ModelAndView startGame(@PathVariable(value = "id") String gameId) {
         ModelAndView modelAndView = new ModelAndView("index");
-        CubeSidesDto cubeSidesDto = controller.getKubeSides(UUID.fromString(gameId));
-        modelAndView.addObject("sides", cubeSidesDto.getSides());
         return modelAndView;
     }
 

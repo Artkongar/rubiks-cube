@@ -26,9 +26,10 @@ public class KubeService {
     public CubeSidesDto rotateKube(UUID gameId, KubeRotateDto dto) {
         MainKube kube = games.get(gameId);
         kube.rotateKube(dto.getX(), dto.getY(), dto.getZ(), dto.getDirection());
-        Map<Integer, List<Color>> sides = kube.getAllColoredSide();
+        Map<Color, List<Color>> sides = kube.getAllColoredSide();
         return CubeSidesDto.builder()
                 .gameId(gameId)
+                .size(kube.getSize())
                 .sides(sides)
                 .build();
     }
@@ -41,6 +42,7 @@ public class KubeService {
         MainKube mainKube = games.get(gameId);
         return CubeSidesDto.builder()
                 .gameId(gameId)
+                .size(mainKube.getSize())
                 .sides(mainKube.getAllColoredSide())
                 .build();
     }

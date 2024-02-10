@@ -23,21 +23,21 @@ public class KubeController {
     }
 
     @PostMapping(
-            value = "/{cubeId}/rotate",
+            value = "/{gameId}/rotate",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public CubeSidesDto rotateKube(@PathVariable UUID cubeId, @RequestBody KubeRotateDto dto) {
-        return kubeService.rotateKube(cubeId, dto);
+    public CubeSidesDto rotateKube(@PathVariable UUID gameId, @RequestBody KubeRotateDto dto) {
+        return kubeService.rotateKube(gameId, dto);
     }
 
     @PostMapping(
-            value = "/{cubeId}",
+            value = "/{gameId}",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public CubeSidesDto getKubeSides(@PathVariable UUID cubeId) {
-        return kubeService.getKubeSides(cubeId);
+    public CubeSidesDto getKubeSides(@PathVariable UUID gameId) {
+        return kubeService.getKubeSides(gameId);
     }
 
     @GetMapping(value = "/{gameId}/check",
