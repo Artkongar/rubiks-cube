@@ -1,6 +1,6 @@
 package com.artysh.rubikscube.dto;
 
-import com.artysh.rubikscube.enums.Color;
+import com.artysh.rubikscube.dto.enums.Color;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,6 +14,6 @@ public class CubeSidesDto {
 
     private UUID gameId;
     private Integer size;
-    private Map<Color, List<Map.Entry<Color, Coordinates>>> sides;
+    private Map<Color, List<CubeColorDto>> sides;
 
 }

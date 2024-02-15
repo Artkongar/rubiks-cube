@@ -183,9 +183,9 @@
                             mainKubeData += '<tr>';
                             for (let j = 0; j < cubeSize; j++) {
                                 let cellColorIndex = i * cubeSize + j;
-                                let colorAndCoords = Object.entries(cellsColor[cellColorIndex])[0];
-                                let cellColor = colorAndCoords[0];
-                                let coordinates = colorAndCoords[1];
+                                let colorAndCoords = cellsColor[cellColorIndex]
+                                let cellColor = colorAndCoords["color"]
+                                let coordinates = colorAndCoords["coordinates"]
 
                                 mainKubeData += `<td bgcolor="` + cellColor + `" class="border-td" x_coord="` + coordinates["x"] + `" y_coord="` + coordinates["y"] + `" z_coord="` + coordinates["z"] + `">`;
                                 mainKubeData += `

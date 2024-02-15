@@ -1,6 +1,6 @@
-package com.artysh.rubikscube.view;
+package com.artysh.rubikscube.service.controller.view;
 
-import com.artysh.rubikscube.controller.KubeController;
+import com.artysh.rubikscube.service.controller.KubeController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;

@@ -1,4 +1,4 @@
-package com.artysh.rubikscube.enums;
+package com.artysh.rubikscube.dto.enums;
 
 public enum RotateDirection {
 

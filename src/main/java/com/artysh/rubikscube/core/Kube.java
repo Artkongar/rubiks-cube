@@ -1,7 +1,7 @@
 package com.artysh.rubikscube.core;
 
-import com.artysh.rubikscube.enums.Color;
-import com.artysh.rubikscube.enums.RotateDirection;
+import com.artysh.rubikscube.dto.enums.Color;
+import com.artysh.rubikscube.dto.enums.RotateDirection;
 import lombok.Getter;
 import org.apache.logging.log4j.util.BiConsumer;
 

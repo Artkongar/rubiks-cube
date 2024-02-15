@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  postgres-service:
+    image: postgres
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_DB: "rcube"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"

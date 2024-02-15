@@ -1,8 +1,9 @@
-package com.artysh.rubikscube.controller;
+package com.artysh.rubikscube.service.controller;
 
 import com.artysh.rubikscube.dto.CubeSidesDto;
 import com.artysh.rubikscube.dto.KubeRotateDto;
-import com.artysh.rubikscube.service.KubeService;
+import com.artysh.rubikscube.service.model.Game;
+import com.artysh.rubikscube.service.service.KubeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,12 @@ public class KubeController {
     @GetMapping(value = "/{cubeSize}",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public UUID initKube(@PathVariable Long cubeSize) {
-        return kubeService.createGame(cubeSize.intValue());
+        Game game = kubeService.createGame(
+                CubeSidesDto.builder()
+                        .size(cubeSize.intValue())
+                        .build()
+        );
+        return game.getId();
     }
 
     @PostMapping(

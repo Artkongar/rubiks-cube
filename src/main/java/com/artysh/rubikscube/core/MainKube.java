@@ -1,8 +1,9 @@
 package com.artysh.rubikscube.core;
 
 import com.artysh.rubikscube.dto.Coordinates;
-import com.artysh.rubikscube.enums.Color;
-import com.artysh.rubikscube.enums.RotateDirection;
+import com.artysh.rubikscube.dto.CubeColorDto;
+import com.artysh.rubikscube.dto.enums.Color;
+import com.artysh.rubikscube.dto.enums.RotateDirection;
 
 import java.util.*;
 import java.util.function.Function;
@@ -25,6 +26,8 @@ public class MainKube {
         this.size = size;
         init();
     }
+
+    //TODO: implement creation of cube from initial data
 
     public boolean isCorrect() {
         long mainLubeSize = kubes.stream().parallel()
@@ -69,9 +72,9 @@ public class MainKube {
         }
     }
 
-    public List<Map.Entry<Color, Coordinates>> getColoredSide(Color side) {
+    public List<CubeColorDto> getColoredSide(Color side) {
         List<Kube> cubes = sides.get(side);
-        List<Map.Entry<Color, Coordinates>> sideCubesColors = cubes.stream().sorted((cube1, cube2) -> {
+        List<CubeColorDto> sideCubesColors = cubes.stream().sorted((cube1, cube2) -> {
             Function<Integer, Integer> calculateRevertedValue = (coordinate) -> (size - 1) - coordinate;
 
             int revertedX1 = calculateRevertedValue.apply(cube1.getX());
@@ -98,13 +101,18 @@ public class MainKube {
             coordinates.setX(kube.getX());
             coordinates.setY(kube.getY());
             coordinates.setZ(kube.getZ());
-            return Map.entry(kube.getSides().get(side), coordinates);
+
+            CubeColorDto cubeColor = CubeColorDto.builder()
+                    .color(kube.getSides().get(side))
+                    .coordinates(coordinates)
+                    .build();
+            return cubeColor;
         }).collect(Collectors.toList());
 
         return sideCubesColors;
     }
 
-    public Map<Color, List<Map.Entry<Color, Coordinates>>> getAllColoredSide() {
+    public Map<Color, List<CubeColorDto>> getAllColoredSide() {
         return Arrays.stream(Color.values())
                 .collect(
                         Collectors.toMap(color -> color, this::getColoredSide)
