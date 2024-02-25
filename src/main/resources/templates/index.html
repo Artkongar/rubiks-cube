@@ -1,65 +1,76 @@
 <!DOCTYPE>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style id="compiled-css" type="text/css">
+        html {
+            height: 100%;
         }
 
         body {
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            perspective: 700px;
-            background-color: #c49e9e;
+            overflow: hidden;
+            height: 100%;
+            font-family: sans-serif;
         }
 
         .cube {
-            width: 540px;
-            height: 540px;
-            position: relative;
-            transform: rotateY(-25deg);
-            transform-style: preserve-3d;
-        }
-
-        .side {
+            position: absolute;
             width: 100%;
             height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            transition: -webkit-transform 1s;
+            -webkit-transform-style: preserve-3d;
+            -webkit-transform: rotateX(0deg);
+        }
+
+        .cubecalculator {
+            -webkit-transform: rotateX(0deg);
+        }
+
+        p {
+            width: 100%;
+            color: #555;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .cube .side {
             position: absolute;
-            backface-visibility: hidden;
+            display: block;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .container {
+            position: relative;
+            margin: 450px auto 300px;
+            width: 600px;
+            height: 600px;
+            perspective: 1000px;
         }
 
         .front {
-            transform: translateZ(270px);
+            -webkit-transform: rotateX(0deg) translateZ(300px);
         }
 
         .back {
-            transform: rotateY(180deg) translateZ(270px);
-        }
-
-        .left {
-            transform: rotateY(-90deg) translateZ(270px);
+            -webkit-transform: rotateX(180deg) translateZ(300px);
         }
 
         .right {
-            transform: rotateY(90deg) translateZ(270px);
+            -webkit-transform: rotateY(90deg) translateZ(300px);
+        }
+
+        .left {
+            -webkit-transform: rotateY(-90deg) translateZ(300px);
         }
 
         .top {
-            transform: rotateX(90deg) translateZ(270px);
+            -webkit-transform: rotateX(90deg) translateZ(300px);
         }
 
         .bottom {
-            transform: rotateX(-90deg) translateZ(270px);
+            -webkit-transform: rotateX(-90deg) translateZ(300px);
         }
 
 
@@ -67,8 +78,12 @@
             table-layout: fixed;
             width: 100%;
             height: 100%;
-            border: none;
+        }
+
+        table {
             border-collapse: collapse;
+            border-spacing: 0;
+            border: 0;
         }
 
         .border-td {
@@ -78,68 +93,216 @@
             border-bottom: 1px solid #000;
         }
 
-        .td-size {
-
-        }
-
-        .arrow-size {
-            height: 55px;
-            width: 55px;
+        img {
+            width: 80%;
+            height: 80%;
         }
 
     </style>
-    <script th:inline="javascript">
-        let x = 0;
-        let y = 0;
-        document.addEventListener('keydown', function (e) {
-            if (e.keyCode === 37) y -= 10;
-            if (e.keyCode === 39) y += 10;
-            if (e.keyCode === 38) x += 10;
-            if (e.keyCode === 40) x -= 10;
-
-            document.querySelector('.cube').style.transform = 'rotateY(' + y + 'deg) rotateX(' + x + 'deg)';
-        });
-
-        function getParentNode(element, level = 1) {
-            while (level-- > 0) {
-                element = element.parentElement;
-                if (!element) return null;
-            }
-            return element;
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.0.2.js"></script>
+    <script type='text/javascript'>
+        function applyTransform(transform) {
+            var cubeCalculator = $('.cubecalculator');
+            var cube = $('#cube');
+            var matrix = cubeCalculator.css('webkitTransform');
+            var composite = transform + ' ' + matrix;
+            cubeCalculator.get(0).style.webkitTransform = composite;
+            matrix = cubeCalculator.css('webkitTransform');
+            cube.get(0).style.webkitTransform = matrix;
         }
 
-        function rotateCube(element) {
-            let parentCell = getParentNode(element, 4);
-            let x = parseInt(parentCell.getAttribute('x_coord'));
-            let y = parseInt(parentCell.getAttribute('y_coord'));
-            let z = parseInt(parentCell.getAttribute('z_coord'));
-            let direction = element.getAttribute("direction");
-            let body = "{" +
-                " \"direction\" : \"" + direction + "\"," +
-                " \"x\" : " + x + "," +
-                " \"y\" : " + y + "," +
-                " \"z\" : " + z +
-                "}";
+        // rotate using arrow keys
+        $(document).keyup(function (e) {
+            e.preventDefault();
+            var key = e.which,
+                arrow = {left: 37, up: 38, right: 39, down: 40},
+                t;
+            switch (key) {
+                case arrow.left:
+                    t = 'rotateY(-90deg)';
+                    break;
+                case arrow.right:
+                    t = 'rotateY(90deg)';
+                    break;
+                case arrow.up:
+                    t = 'rotateX(90deg)';
+                    break;
+                case arrow.down:
+                    t = 'rotateX(-90deg)';
+                    break;
+            }
+            applyTransform(t);
+        });
 
-            let gameId = location.pathname.split('/')[2];
-            let xhr = new XMLHttpRequest();
-            let hostname = location.hostname;
-            xhr.open('POST', window.location.protocol + '//' + hostname + ':' + window.location.port + '/kube/' + gameId + "/rotate", true);
-            xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
-            xhr.setRequestHeader('Access-Control-Allow-Methods', 'POST');
-            xhr.setRequestHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    let mainKube = document.getElementById("mainKube");
-                    mainKube.innerHTML = '';
-                    printCube();
+        function getRotation(i, j, color, cubeSize) {
+            if (color === 'RED') {
+                if (i === 0) {
+                    return "Z_UP";
+                }
+                if (i === (cubeSize * 3 - 1)) {
+                    return "Z_DOWN";
+                }
+                if (j === 0) {
+                    return "X_DOWN";
+                }
+                if (j === (cubeSize * 3 - 1)) {
+                    return "X_UP";
+                }
+            } else if (color === 'WHITE') {
+                if (i === 0) {
+                    return "Z_UP";
+                }
+                if (i === (cubeSize * 3 - 1)) {
+                    return "Z_DOWN";
+                }
+                if (j === 0) {
+                    return "Y_UP";
+                }
+                if (j === (cubeSize * 3 - 1)) {
+                    return "Y_DOWN";
+                }
+            } else if (color === 'ORANGE') {
+                if (i === 0) {
+                    return "Z_UP";
+                }
+                if (i === (cubeSize * 3 - 1)) {
+                    return "Z_DOWN";
+                }
+                if (j === 0) {
+                    return "X_UP";
+                }
+                if (j === (cubeSize * 3 - 1)) {
+                    return "X_DOWN";
+                }
+            } else if (color === 'YELLOW') {
+                if (i === 0) {
+                    return "Z_UP";
+                }
+                if (i === (cubeSize * 3 - 1)) {
+                    return "Z_DOWN";
+                }
+                if (j === 0) {
+                    return "Y_DOWN";
+                }
+                if (j === (cubeSize * 3 - 1)) {
+                    return "Y_UP";
+                }
+            } else if (color === 'BLUE') {
+                if (i === 0) {
+                    return "Y_UP";
+                }
+                if (i === (cubeSize * 3 - 1)) {
+                    return "Y_DOWN";
+                }
+                if (j === 0) {
+                    return "X_DOWN";
+                }
+                if (j === (cubeSize * 3 - 1)) {
+                    return "X_UP";
+                }
+            } else {
+                // GREEN
+                if (i === 0) {
+                    return "Y_DOWN";
+                }
+                if (i === (cubeSize * 3 - 1)) {
+                    return "Y_UP";
+                }
+                if (j === 0) {
+                    return "X_DOWN";
+                }
+                if (j === (cubeSize * 3 - 1)) {
+                    return "X_UP";
                 }
             }
 
-            xhr.send(body);
+            return null;
+        }
 
+        function createRow(i, j, cubeSize, color, cellsColorAndCoordinates, mainKube) {
+            let index = Math.floor(i / 3) * cubeSize + Math.floor(j / 3);
+            let colorCell = cellsColorAndCoordinates[index].color;
+            let sideDivContent = `<td bgcolor="` + colorCell + `" `;
 
+            let borderStyleParams = "";
+            if (j % 3 === 2) {
+                borderStyleParams += 'border-right: 1px solid #000; '
+            }
+            if (j % 3 === 0) {
+                borderStyleParams += 'border-left: 1px solid #000; '
+            }
+            if (i % 3 === 2) {
+                borderStyleParams += 'border-bottom: 1px solid #000; '
+            }
+            if (i % 3 === 0) {
+                borderStyleParams += 'border-top: 1px solid #000; '
+            }
+
+            let content = ``;
+            let arrowDivContent = ``;
+            let arrowDivAttributes = ``;
+
+            let isArrowCell = false;
+            let arrowDeg = 0;
+            if (i % 3 === 1 && j === 0) {
+                isArrowCell = true;
+                arrowDeg = 180;
+            }
+            if (i % 3 === 1 && j === cubeSize * 3 - 1) {
+                isArrowCell = true;
+                arrowDeg = 0;
+            }
+            if (j % 3 === 1 && i === cubeSize * 3 - 1) {
+                isArrowCell = true;
+                arrowDeg = 90;
+            }
+            if (j % 3 === 1 && i === 0) {
+                isArrowCell = true;
+                arrowDeg = -90;
+            }
+
+            if (isArrowCell) {
+                let coordinates = cellsColorAndCoordinates[index].coordinates;
+                let direction = getRotation(i, j, color, cubeSize);
+                arrowDivAttributes += `direction="` + direction + `" x_coord="` + coordinates.x + `" y_coord="` + coordinates.y + `"` + ` z_coord="` + coordinates.z + `"`
+
+                arrowDivContent += `
+                                        <div style="text-align: center;" ` + arrowDivAttributes + `>
+                                            <img src="/images/right_arrow.png" style="transform: rotate(` + arrowDeg + `deg);">
+                                        </div>`
+                content += arrowDivContent;
+            }
+
+            let height = mainKube.offsetHeight / (cubeSize * 3);
+            borderStyleParams += 'height: ' + height;
+
+            let closeSideDiv = `>`
+            if (borderStyleParams !== "") {
+                sideDivContent += 'style="' + borderStyleParams + '"';
+            }
+            sideDivContent += `onclick='rotateCube(this)'`;
+            sideDivContent += closeSideDiv;
+            sideDivContent += content;
+
+            sideDivContent += `</td>`;
+            return sideDivContent;
+        }
+
+        function createSideDiv(className, cubeSize, cellsColorAndCoordinates, color, mainKube) {
+            let sideDiv = `<div class="` + className + `">`;
+            sideDiv += `<table class="table">`;
+
+            for (let i = 0; i < cubeSize * 3; i++) {
+                sideDiv += `<tr>`;
+                for (let j = 0; j < cubeSize * 3; j++) {
+                    sideDiv += createRow(i, j, cubeSize, color, cellsColorAndCoordinates, mainKube);
+                }
+
+                sideDiv += `</tr>`;
+            }
+            sideDiv += `</table>`;
+            sideDiv += `</div>`;
+            return sideDiv;
         }
 
         function printCube() {
@@ -162,132 +325,85 @@
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.onload = function () {
                 if (xhr.status === 200) {
-                    let mainKube = document.getElementById("mainKube");
+                    let mainKube = document.getElementById("cube");
                     let data = JSON.parse(xhr.responseText);
 
                     let cubeSize = data.size;
                     let iter = sidesClasses.keys();
                     let colorElement = iter.next();
-                    let mainKubeData = '';
+
                     while (colorElement.value !== undefined) {
                         let color = colorElement.value;
                         let className = sidesClasses.get(color);
-                        let cellsColor = data.sides[color];
+                        let cellsColorAndCoordinates = data.sides[color];
 
-                        mainKubeData += `
-                        <div class="` + className + `">
-                            <table class="table">`;
-
-                        for (let i = 0; i < cubeSize; i++) {
-                            console.log('i' + i);
-                            mainKubeData += '<tr>';
-                            for (let j = 0; j < cubeSize; j++) {
-                                let cellColorIndex = i * cubeSize + j;
-                                let colorAndCoords = cellsColor[cellColorIndex]
-                                let cellColor = colorAndCoords["color"]
-                                let coordinates = colorAndCoords["coordinates"]
-
-                                mainKubeData += `<td bgcolor="` + cellColor + `" class="border-td" x_coord="` + coordinates["x"] + `" y_coord="` + coordinates["y"] + `" z_coord="` + coordinates["z"] + `">`;
-                                mainKubeData += `
-                                    <table class="td-size">
-                                        <tr>`;
-                                mainKubeData += `
-                                            <td class="arrow-size"></td>`;
-                                if (i === 0) {
-                                    let direction = ''
-                                    if (color === 'RED' || color === 'YELLOW' || color === 'WHITE') {
-                                        direction = 'Z_UP';
-                                    } else if (color === 'ORANGE') {
-                                        direction = 'Z_DOWN';
-                                    } else if (color === 'BLUE') {
-                                        direction = 'Y_UP';
-                                    } else if (color === 'GREEN') {
-                                        direction = 'Y_DOWN';
-                                    }
-                                    mainKubeData += `
-                                            <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="rotateCube(this)" direction="` + direction + `">&uarr;</td>`;
-                                } else {
-                                    mainKubeData += `
-                                            <td class="arrow-size"></td>`;
-                                }
-                                mainKubeData += `
-                                            <td class="arrow-size"></td>`;
-                                mainKubeData += `
-                                        </tr>
-                                        <tr>`;
-                                if (j === 0) {
-                                    let direction = ''
-                                    if (color === 'RED' || color === 'BLUE' || color === 'ORANGE' || color === 'GREEN') {
-                                        direction = 'X_DOWN';
-                                    } else if (color === 'WHITE') {
-                                        direction = 'Y_UP';
-                                    } else if (color === 'YELLOW') {
-                                        direction = 'Y_DOWN';
-                                    }
-
-                                    mainKubeData += `
-                                            <td class="arrow-size" style="font-size: 3em" onclick="rotateCube(this)" direction="` + direction + `">&larr;</td>`;
-                                } else {
-                                    mainKubeData += `
-                                            <td class="arrow-size"></td>`;
-                                }
-                                mainKubeData += `
-                                            <td class="arrow-size"></td>`;
-                                if (j === cubeSize - 1) {
-                                    let direction = ''
-                                    if (color === 'RED' || color === 'BLUE' || color === 'ORANGE' || color === 'GREEN') {
-                                        direction = 'X_UP';
-                                    } else if (color === 'WHITE') {
-                                        direction = 'Y_DOWN';
-                                    } else if (color === 'YELLOW') {
-                                        direction = 'Y_UP';
-                                    }
-
-                                    mainKubeData += `
-                                            <td class="arrow-size" style="font-size: 3em" onclick="rotateCube(this)" direction="` + direction + `">&rarr;</td>`;
-                                } else {
-                                    mainKubeData += `
-                                        <td class="arrow-size"></td>`;
-                                }
-                                mainKubeData += `
-                                        </tr>
-                                        <tr>`;
-                                mainKubeData += `
-                                        <td class="arrow-size"></td>`;
-                                if (i === cubeSize - 1) {
-                                    let direction = ''
-                                    if (color === 'RED' || color === 'YELLOW' || color === 'WHITE') {
-                                        direction = 'Z_DOWN';
-                                    } else if (color === 'ORANGE') {
-                                        direction = 'Z_UP';
-                                    } else if (color === 'BLUE') {
-                                        direction = 'Y_DOWN';
-                                    } else if (color === 'GREEN') {
-                                        direction = 'Y_UP';
-                                    }
-
-                                    mainKubeData += `
-                                        <td class="arrow-size" style="font-size: 3em; text-align: center;" onclick="rotateCube(this)" rotate="down" direction="` + direction + `">&darr;</td>`;
-                                } else {
-                                    mainKubeData += `
-                                        <td class="arrow-size"></td>`;
-                                }
-                                mainKubeData += `
-                                        <td class="arrow-size"></td>
-                                    </tr>
-                                </table>`;
-                                mainKubeData += `</td>`;
+                        if (color === 'ORANGE') {
+                            const reversedCellsColorAndCoordinates = []
+                            for (let i = cellsColorAndCoordinates.length - 1; i >= 0; i--) {
+                                let valueAtIndex = cellsColorAndCoordinates[i];
+                                reversedCellsColorAndCoordinates.push(valueAtIndex);
                             }
-                            mainKubeData += '</tr>';
+                            cellsColorAndCoordinates = reversedCellsColorAndCoordinates;
                         }
 
-                        mainKubeData += `
-                            </table>
-                        </div>`;
+                        let sideDiv = createSideDiv(className, cubeSize, cellsColorAndCoordinates, color, mainKube);
+                        mainKube.innerHTML += sideDiv;
 
                         colorElement = iter.next();
                     }
-                    mainKube.innerHTML += mainKubeData;
+                }
+            }
+            xhr.send();
+        }
+
+        function rotateCube(element) {
+            let infoDiv = element.children[0];
+            let x = parseInt(infoDiv.getAttribute('x_coord'));
+            let y = parseInt(infoDiv.getAttribute('y_coord'));
+            let z = parseInt(infoDiv.getAttribute('z_coord'));
+            let direction = infoDiv.getAttribute("direction");
+            let body = "{" +
+                " \"direction\" : \"" + direction + "\"," +
+                " \"x\" : " + x + "," +
+                " \"y\" : " + y + "," +
+                " \"z\" : " + z +
+                "}";
+
+            let gameId = location.pathname.split('/')[2];
+            let xhr = new XMLHttpRequest();
+            let hostname = location.hostname;
+            xhr.open('POST', window.location.protocol + '//' + hostname + ':' + window.location.port + '/kube/' + gameId + "/rotate", true);
+            xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+            xhr.setRequestHeader('Access-Control-Allow-Methods', 'POST');
+            xhr.setRequestHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    let mainKube = document.getElementById("cube");
+                    mainKube.innerHTML = '';
+                    printCube();
+                }
+            }
+
+            xhr.send(body);
+        }
+
+        function validate() {
+            let xhr = new XMLHttpRequest();
+            let hostname = location.hostname;
+            let gameId = location.pathname.split('/')[2];
+            xhr.open('GET', window.location.protocol + '//' + hostname + ':' + window.location.port + '/kube/' + gameId + "/check", true);
+            xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+            xhr.setRequestHeader('Access-Control-Allow-Methods', 'POST');
+            xhr.setRequestHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    if (xhr.responseText === 'true') {
+                        alert("Ok");
+                    } else {
+                        alert("Not Ok");
+                    }
                 }
             }
             xhr.send();
@@ -297,8 +413,14 @@
     </script>
 </head>
 <body>
-<div class="cube" id="mainKube">
+<div class="container">
+    <div id="cube" class="cube">
+    </div>
+</div>
+<div class="cubecalculator"></div>
 
+<div>
+    <input type="button" value="validate" onclick="validate()">
 </div>
 </body>
 </html>

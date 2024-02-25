@@ -27,8 +27,6 @@ public class MainKube {
         init();
     }
 
-    //TODO: implement creation of cube from initial data
-
     public boolean isCorrect() {
         long mainLubeSize = kubes.stream().parallel()
                 .filter(kube -> kube.getX().equals(kube.getOriginalX())
