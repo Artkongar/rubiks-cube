@@ -17,9 +17,6 @@ public class Kube {
     private Integer x;
     private Integer y;
     private Integer z;
-    private final Integer originalX;
-    private final Integer originalY;
-    private final Integer originalZ;
     // key - MainKube side, value - Kube side (always constant)
     Map<Color, Color> sides = new HashMap<>(3);
 
@@ -27,9 +24,6 @@ public class Kube {
         this.x = x;
         this.y = y;
         this.z = z;
-        this.originalX = x;
-        this.originalY = y;
-        this.originalZ = z;
 
         this.mainKube = mainKube;
 

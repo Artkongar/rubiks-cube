@@ -28,15 +28,13 @@ public class MainKube {
     }
 
     public boolean isCorrect() {
-        long mainLubeSize = kubes.stream().parallel()
-                .filter(kube -> kube.getX().equals(kube.getOriginalX())
-                        && kube.getY().equals(kube.getOriginalY())
-                        && kube.getZ().equals(kube.getOriginalZ()))
-                .filter(kube -> kube.getX() <= size && kube.getY() <= size && kube.getZ() <= size)
-                .filter(kube -> kube.getSides().entrySet().stream()
-                        .allMatch(entry -> entry.getKey().equals(entry.getValue()))
-                ).count();
-        return (int) mainLubeSize == Math.pow(size, 3);
+        Map<Color, List<CubeColorDto>> cubeColors = getAllColoredSide();
+        return cubeColors.values().stream()
+                .allMatch(cubes -> {
+                    Color sideColor = cubes.get(0).getColor();
+                    return cubes.stream()
+                            .allMatch(cube -> cube.getColor().equals(sideColor));
+                });
     }
 
     public void rotateKube(int x, int y, int z, RotateDirection direction) {
@@ -72,40 +70,20 @@ public class MainKube {
 
     public List<CubeColorDto> getColoredSide(Color side) {
         List<Kube> cubes = sides.get(side);
-        List<CubeColorDto> sideCubesColors = cubes.stream().sorted((cube1, cube2) -> {
-            Function<Integer, Integer> calculateRevertedValue = (coordinate) -> (size - 1) - coordinate;
+        List<CubeColorDto> sideCubesColors = cubes.stream()
+                .sorted(new CubesForSideComparator(side))
+                .map(kube -> {
+                    Coordinates coordinates = new Coordinates();
+                    coordinates.setX(kube.getX());
+                    coordinates.setY(kube.getY());
+                    coordinates.setZ(kube.getZ());
 
-            int revertedX1 = calculateRevertedValue.apply(cube1.getX());
-            int revertedZ1 = calculateRevertedValue.apply(cube1.getZ());
-
-            int revertedX2 = calculateRevertedValue.apply(cube2.getX());
-            int revertedZ2 = calculateRevertedValue.apply(cube2.getZ());
-
-            if (Color.RED.equals(side)) {
-                return (cube1.getY() * 10 + cube1.getX()) - (cube2.getY() * 10 + cube2.getX());
-            } else if (Color.ORANGE.equals(side)) {
-                return (cube1.getY() * 10 + revertedX1) - (cube2.getY() * 10 + revertedX2);
-            } else if (Color.GREEN.equals(side)) {
-                return (cube1.getY() * 10 + revertedZ1) - (cube2.getY() * 10 + revertedZ2);
-            } else if (Color.BLUE.equals(side)) {
-                return (cube1.getY() * 10 + cube1.getZ()) - (cube2.getY() * 10 + cube2.getZ());
-            } else if (Color.WHITE.equals(side)) {
-                return (revertedZ1 * 10 + cube1.getX()) - (revertedZ2 * 10 + cube2.getX());
-            } else {
-                return (cube1.getZ() * 10 + cube1.getX()) - (cube2.getZ() * 10 + cube2.getX());
-            }
-        }).map(kube -> {
-            Coordinates coordinates = new Coordinates();
-            coordinates.setX(kube.getX());
-            coordinates.setY(kube.getY());
-            coordinates.setZ(kube.getZ());
-
-            CubeColorDto cubeColor = CubeColorDto.builder()
-                    .color(kube.getSides().get(side))
-                    .coordinates(coordinates)
-                    .build();
-            return cubeColor;
-        }).collect(Collectors.toList());
+                    CubeColorDto cubeColor = CubeColorDto.builder()
+                            .color(kube.getSides().get(side))
+                            .coordinates(coordinates)
+                            .build();
+                    return cubeColor;
+                }).collect(Collectors.toList());
 
         return sideCubesColors;
     }
@@ -130,6 +108,41 @@ public class MainKube {
                 }
             }
         }
+    }
+
+    private class CubesForSideComparator implements Comparator<Kube> {
+
+        private Color side;
+
+        private CubesForSideComparator(Color side) {
+            this.side = side;
+        }
+
+        @Override
+        public int compare(Kube cube1, Kube cube2) {
+            Function<Integer, Integer> calculateRevertedValue = (coordinate) -> (size - 1) - coordinate;
+
+            int revertedX1 = calculateRevertedValue.apply(cube1.getX());
+            int revertedZ1 = calculateRevertedValue.apply(cube1.getZ());
+
+            int revertedX2 = calculateRevertedValue.apply(cube2.getX());
+            int revertedZ2 = calculateRevertedValue.apply(cube2.getZ());
+
+            if (Color.RED.equals(side)) {
+                return (cube1.getY() * 10 + cube1.getX()) - (cube2.getY() * 10 + cube2.getX());
+            } else if (Color.ORANGE.equals(side)) {
+                return (cube1.getY() * 10 + revertedX1) - (cube2.getY() * 10 + revertedX2);
+            } else if (Color.GREEN.equals(side)) {
+                return (cube1.getY() * 10 + revertedZ1) - (cube2.getY() * 10 + revertedZ2);
+            } else if (Color.BLUE.equals(side)) {
+                return (cube1.getY() * 10 + cube1.getZ()) - (cube2.getY() * 10 + cube2.getZ());
+            } else if (Color.WHITE.equals(side)) {
+                return (revertedZ1 * 10 + cube1.getX()) - (revertedZ2 * 10 + cube2.getX());
+            } else {
+                return (cube1.getZ() * 10 + cube1.getX()) - (cube2.getZ() * 10 + cube2.getX());
+            }
+        }
+
     }
 
 }
