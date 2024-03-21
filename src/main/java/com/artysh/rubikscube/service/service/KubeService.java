@@ -16,11 +16,8 @@ import com.artysh.rubikscube.service.utils.jackson.JacksonUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -48,7 +45,7 @@ public class KubeService {
 
         Game game = gameService.getById(gameId);
         History lastHistory = historyService.getLastHistoryByGameId(gameId);
-        Integer version;
+        int version;
         if (lastHistory != null) {
             version = lastHistory.getVersion() + 1;
         } else {
@@ -80,6 +77,32 @@ public class KubeService {
 
     public boolean isCorrect(UUID gameId) {
         return games.get(gameId).isCorrect();
+    }
+
+    public CubeSidesDto scramble(UUID gameId) {
+        Random rnd = new Random();
+        int scrambleNum = rnd.nextInt(10, 30);
+
+        MainKube cube = games.get(gameId);
+        int size = cube.getSize();
+
+        IntStream.range(0, scrambleNum).forEach(i -> {
+            RotateDirection[] rotateDirections = RotateDirection.values();
+            RotateDirection rotateDirection = rotateDirections[rnd.nextInt(0, rotateDirections.length)];
+            int x = rnd.nextInt(0, size);
+            int y = rnd.nextInt(0, size);
+            int z = rnd.nextInt(0, size);
+
+            KubeRotateDto rotateDto = new KubeRotateDto();
+            rotateDto.setDirection(rotateDirection);
+            rotateDto.setX(x);
+            rotateDto.setY(y);
+            rotateDto.setZ(z);
+
+            this.rotateKube(gameId, rotateDto);
+        });
+
+        return getKubeSides(gameId);
     }
 
     public CubeSidesDto getKubeSides(UUID gameId) {

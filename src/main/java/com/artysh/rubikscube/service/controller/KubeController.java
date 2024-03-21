@@ -34,8 +34,7 @@ public class KubeController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public CubeSidesDto rotateKube(@PathVariable UUID gameId, @RequestBody KubeRotateDto dto) {
-        CubeSidesDto result = kubeService.rotateKube(gameId, dto);
-        return result;
+        return kubeService.rotateKube(gameId, dto);
     }
 
     @PostMapping(
@@ -51,6 +50,12 @@ public class KubeController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public boolean checkCorrect(@PathVariable UUID gameId) {
         return kubeService.isCorrect(gameId);
+    }
+
+    @GetMapping(value = "/{gameId}/scramble",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public CubeSidesDto scramble(@PathVariable UUID gameId) {
+        return kubeService.scramble(gameId);
     }
 
 }

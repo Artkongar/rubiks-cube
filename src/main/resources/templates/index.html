@@ -305,8 +305,8 @@
             return sideDiv;
         }
 
-        function printCube() {
-            let gameId = location.pathname.split('/')[2];
+        function printCubeByData(data) {
+            let mainKube = document.getElementById("cube");
 
             const sidesClasses = new Map();
             sidesClasses.set("RED", "side front");
@@ -315,6 +315,34 @@
             sidesClasses.set("BLUE", "side right");
             sidesClasses.set("WHITE", "side top");
             sidesClasses.set("YELLOW", "side bottom");
+
+            let cubeSize = data.size;
+            let iter = sidesClasses.keys();
+            let colorElement = iter.next();
+
+            while (colorElement.value !== undefined) {
+                let color = colorElement.value;
+                let className = sidesClasses.get(color);
+                let cellsColorAndCoordinates = data.sides[color];
+
+                if (color === 'ORANGE') {
+                    const reversedCellsColorAndCoordinates = []
+                    for (let i = cellsColorAndCoordinates.length - 1; i >= 0; i--) {
+                        let valueAtIndex = cellsColorAndCoordinates[i];
+                        reversedCellsColorAndCoordinates.push(valueAtIndex);
+                    }
+                    cellsColorAndCoordinates = reversedCellsColorAndCoordinates;
+                }
+
+                let sideDiv = createSideDiv(className, cubeSize, cellsColorAndCoordinates, color, mainKube);
+                mainKube.innerHTML += sideDiv;
+
+                colorElement = iter.next();
+            }
+        }
+
+        function printCube() {
+            let gameId = location.pathname.split('/')[2];
 
             let xhr = new XMLHttpRequest();
             let hostname = location.hostname;
@@ -325,32 +353,8 @@
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.onload = function () {
                 if (xhr.status === 200) {
-                    let mainKube = document.getElementById("cube");
                     let data = JSON.parse(xhr.responseText);
-
-                    let cubeSize = data.size;
-                    let iter = sidesClasses.keys();
-                    let colorElement = iter.next();
-
-                    while (colorElement.value !== undefined) {
-                        let color = colorElement.value;
-                        let className = sidesClasses.get(color);
-                        let cellsColorAndCoordinates = data.sides[color];
-
-                        if (color === 'ORANGE') {
-                            const reversedCellsColorAndCoordinates = []
-                            for (let i = cellsColorAndCoordinates.length - 1; i >= 0; i--) {
-                                let valueAtIndex = cellsColorAndCoordinates[i];
-                                reversedCellsColorAndCoordinates.push(valueAtIndex);
-                            }
-                            cellsColorAndCoordinates = reversedCellsColorAndCoordinates;
-                        }
-
-                        let sideDiv = createSideDiv(className, cubeSize, cellsColorAndCoordinates, color, mainKube);
-                        mainKube.innerHTML += sideDiv;
-
-                        colorElement = iter.next();
-                    }
+                    printCubeByData(data);
                 }
             }
             xhr.send();
@@ -409,6 +413,24 @@
             xhr.send();
         }
 
+        function scramble() {
+            let xhr = new XMLHttpRequest();
+            let hostname = location.hostname;
+            let gameId = location.pathname.split('/')[2];
+            xhr.open('GET', window.location.protocol + '//' + hostname + ':' + window.location.port + '/kube/' + gameId + "/scramble", true);
+            xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+            xhr.setRequestHeader('Access-Control-Allow-Methods', 'POST');
+            xhr.setRequestHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    let data = JSON.parse(xhr.responseText);
+                    printCubeByData(data);
+                }
+            }
+            xhr.send();
+        }
+
         window.onload = printCube;
     </script>
 </head>
@@ -421,6 +443,7 @@
 
 <div>
     <input type="button" value="validate" onclick="validate()">
+    <input type="button" value="scramble" onclick="scramble()">
 </div>
 </body>
 </html>
